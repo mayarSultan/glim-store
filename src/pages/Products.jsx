@@ -10,20 +10,20 @@ function Products() {
   const [active, setActive] = useState('all')
   const [loading, setLoading] = useState(true)
 
-  const location = useLocation()
+ const location = useLocation()
 const searchParams = new URLSearchParams(location.search)
 const searchQuery = searchParams.get('search') || ''
+const categoryQuery = searchParams.get('category') || 'all'
 const [searchInput, setSearchInput] = useState(searchQuery)
 
-  useEffect(() => {
-    getProducts().then(data => {
-      setProducts(data)
-      setLoading(false)
-    })
-  }, [])
-  useEffect(() => {
+useEffect(() => {
   setSearchInput(searchQuery)
 }, [searchQuery])
+
+useEffect(() => {
+  const cat = categoryQuery === 'home decor' ? 'home' : categoryQuery
+  setActive(cat)
+}, [categoryQuery])
 
   const filtered = products
   .filter(p => active === 'all' || p.category === active)

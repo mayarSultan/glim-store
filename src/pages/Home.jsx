@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { getProducts } from '../api'
 
 const categories = [
   { icon: '👜', label: 'bags' },
@@ -7,14 +9,14 @@ const categories = [
   { icon: '🏠', label: 'home' },
 ]
 
-const products = [
-  { id: 1, name: 'market tote bag', price: 85, old: 110, emoji: '🧺', bg: '#ede8f7' },
-  { id: 2, name: 'chunky cardigan', price: 220, emoji: '🧣', bg: '#f5ede3' },
-  { id: 3, name: 'flower hair clip', price: 35, emoji: '🌸', bg: '#fbe8f0' },
-  { id: 4, name: 'plant hanger', price: 60, old: 75, emoji: '🪴', bg: '#ede8f7' },
-]
-
 function Home() {
+  const [products, setProducts] = useState([])
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    getProducts().then(data => setProducts(data.slice(0, 4)))
+  }, [])
+
   return (
     <div style={{ background: '#fdf8f4', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
 
@@ -29,9 +31,16 @@ function Home() {
             shop now →
           </button>
         </Link>
+        {/* Interactive category tags */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px', flexWrap: 'wrap' }}>
           {['bags', 'cardigans', 'accessories', 'home decor'].map(tag => (
-            <span key={tag} style={{ background: '#fff', border: '0.5px solid #c9b8e8', color: '#7c5cbf', borderRadius: '20px', padding: '4px 14px', fontSize: '12px' }}>
+            <span
+              key={tag}
+              onClick={() => navigate(`/products?category=${tag}`)}
+              style={{ background: '#fff', border: '0.5px solid #c9b8e8', color: '#7c5cbf', borderRadius: '20px', padding: '4px 14px', fontSize: '12px', cursor: 'pointer' }}
+              onMouseEnter={e => e.target.style.background = '#f3eefb'}
+              onMouseLeave={e => e.target.style.background = '#fff'}
+            >
               {tag}
             </span>
           ))}
@@ -44,7 +53,13 @@ function Home() {
         <p style={{ fontSize: '13px', color: '#9b8bb5', marginBottom: '20px' }}>find your next favourite piece</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
           {categories.map(cat => (
-            <div key={cat.label} style={{ background: '#fff', border: '0.5px solid #e8e0f0', borderRadius: '10px', padding: '14px 8px', textAlign: 'center', cursor: 'pointer' }}>
+            <div
+              key={cat.label}
+              onClick={() => navigate(`/products?category=${cat.label}`)}
+              style={{ background: '#fff', border: '0.5px solid #e8e0f0', borderRadius: '10px', padding: '14px 8px', textAlign: 'center', cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = '#c9b8e8'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = '#e8e0f0'}
+            >
               <div style={{ fontSize: '22px', marginBottom: '6px' }}>{cat.icon}</div>
               <div style={{ fontSize: '11px', color: '#6b5b8a', fontWeight: 500 }}>{cat.label}</div>
             </div>
@@ -52,22 +67,32 @@ function Home() {
         </div>
       </div>
 
-      {/* Featured products */}
+      {/* Featured products — from real API */}
       <div style={{ padding: '16px 24px 32px' }}>
         <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#3d2c6e' }}>featured products</h2>
         <p style={{ fontSize: '13px', color: '#9b8bb5', marginBottom: '20px' }}>new arrivals this week</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px' }}>
           {products.map(p => (
-            <Link to={`/products/${p.id}`} key={p.id} style={{ textDecoration: 'none' }}>
-              <div style={{ background: '#fff', border: '0.5px solid #e8e0f0', borderRadius: '12px', overflow: 'hidden' }}>
-                <div style={{ height: '110px', background: p.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px' }}>
-                  {p.emoji}
+            <Link to={`/products/${p._id}`} key={p._id} style={{ textDecoration: 'none' }}>
+              <div style={{ background: '#fff', border: '0.5px solid #e8e0f0', borderRadius: '12px', overflow: 'hidden' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#c9b8e8'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#e8e0f0'}
+              >
+                {/* Real image or emoji fallback */}
+                <div style={{ height: '110px', background: p.bg, overflow: 'hidden' }}>
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px' }}>
+                      {p.emoji}
+                    </div>
+                  )}
                 </div>
                 <div style={{ padding: '10px 12px' }}>
                   <div style={{ fontSize: '13px', fontWeight: 500, color: '#3d2c6e', marginBottom: '4px' }}>{p.name}</div>
                   <div style={{ fontSize: '13px', color: '#7c5cbf', fontWeight: 600 }}>
                     SR {p.price}
-                    {p.old && <span style={{ fontSize: '11px', color: '#b0a0c8', textDecoration: 'line-through', marginLeft: '4px' }}>SR {p.old}</span>}
+                    {p.oldPrice && <span style={{ fontSize: '11px', color: '#b0a0c8', textDecoration: 'line-through', marginLeft: '4px' }}>SR {p.oldPrice}</span>}
                   </div>
                 </div>
               </div>
