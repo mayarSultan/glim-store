@@ -1,5 +1,5 @@
 
-const BASE_URL = 'http://localhost:5000/api'
+const BASE_URL = 'https://glim-backend-558c.onrender.com/api'
 
 export async function getProducts() {
   const res = await fetch(`${BASE_URL}/products`)
