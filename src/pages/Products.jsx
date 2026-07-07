@@ -17,6 +17,22 @@ const categoryQuery = searchParams.get('category') || 'all'
 const [searchInput, setSearchInput] = useState(searchQuery)
 
 useEffect(() => {
+  getProducts()
+    .then(data => {
+      if (Array.isArray(data)) {
+        setProducts(data)
+      } else {
+        console.error('unexpected response:', data)
+      }
+      setLoading(false)
+    })
+    .catch(err => {
+      console.error('fetch failed:', err)
+      setLoading(false)
+    })
+}, [])
+
+useEffect(() => {
   setSearchInput(searchQuery)
 }, [searchQuery])
 
